@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <sys/time.h>
+#include <time.h>
 #include <wiringPi.h>
 
 // Which GPIO pin we're using
-#define PIN 2
+#define PIN 3
 // How much time a change must be since the last in order to count as a change
 #define IGNORE_CHANGE_BELOW_USEC 10000
 
@@ -11,6 +12,9 @@
 static volatile int state;
 // Time of last change
 struct timeval last_change;
+
+unsigned int i = 0;
+time_t start, end;
 
 // Handler for interrupt
 void handle(void) {
@@ -24,11 +28,12 @@ void handle(void) {
 
 	// Filter jitter
 	if (diff > IGNORE_CHANGE_BELOW_USEC) {
-		if (state) {
-			printf("Falling\n");
-		}
-		else {
-			printf("Rising\n");
+		if (!state) {
+			time(&start);
+			printf("%3d. Pressed\n", ++i);
+		} else {
+			time(&end);
+			printf("      - for %f seconds\n", difftime (end,start));
 		}
 
 		state = !state;
